@@ -1,0 +1,7 @@
+--
+---- Repeatable maintenance: ensure next/prev month partitions exist
+--DO $$ BEGIN
+--    PERFORM ensure_month_partitions('timesheet_snapshot', (CURRENT_DATE - INTERVAL '1 month')::date, (CURRENT_DATE + INTERVAL '3 months')::date);
+--    PERFORM ensure_month_partitions('billing_snapshot',   (CURRENT_DATE - INTERVAL '1 month')::date, (CURRENT_DATE + INTERVAL '3 months')::date);
+--    PERFORM ensure_bgv_partitions((CURRENT_DATE - INTERVAL '1 month')::date, (CURRENT_DATE + INTERVAL '3 months')::date);
+--END $$;

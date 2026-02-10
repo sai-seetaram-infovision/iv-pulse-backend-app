@@ -1,0 +1,46 @@
+--
+---- Phase 20: DATA MIGRATION + SWAP
+---- !!! Read the variables below and adjust history window as needed.
+--
+---- === CONFIG: history window (months) ===
+--DO $$ BEGIN
+--    -- Create partitions for last 24 months + next 3 months
+--    PERFORM ensure_month_partitions('timesheet_snapshot_p', (CURRENT_DATE - INTERVAL '24 months')::date, (CURRENT_DATE + INTERVAL '3 months')::date);
+--    PERFORM ensure_month_partitions('billing_snapshot_p',   (CURRENT_DATE - INTERVAL '24 months')::date, (CURRENT_DATE + INTERVAL '3 months')::date);
+--    PERFORM ensure_bgv_partitions((CURRENT_DATE - INTERVAL '24 months')::date, (CURRENT_DATE + INTERVAL '3 months')::date);
+--END $$;
+--
+---- 1) Copy data into partitioned parents
+---- Timesheets
+--INSERT INTO timesheet_snapshot_p (year_month, engagement_id, engagement_resource_id, resource_id, submitted_flag, approved_flag, approval_date, total_hours, created_at)
+--SELECT year_month, engagement_id, engagement_resource_id, resource_id, submitted_flag, approved_flag, approval_date, total_hours, created_at
+--FROM timesheet_snapshot;
+--
+---- Billing
+--INSERT INTO billing_snapshot_p (year_month, engagement_id, engagement_resource_id, billed_amount, created_at)
+--SELECT year_month, engagement_id, engagement_resource_id, billed_amount, created_at
+--FROM billing_snapshot;
+--
+---- BGV
+--INSERT INTO bgv_status_p (resource_id, bgv_vendor, status, requested_on, verified_on, remarks, created_at)
+--SELECT resource_id, bgv_vendor, status, requested_on, verified_on, remarks, created_at
+--FROM bgv_status;
+--
+---- 2) Swap table names atomically
+--ALTER TABLE timesheet_snapshot RENAME TO timesheet_snapshot_legacy;
+--ALTER TABLE billing_snapshot   RENAME TO billing_snapshot_legacy;
+--ALTER TABLE bgv_status         RENAME TO bgv_status_legacy;
+--
+--ALTER TABLE timesheet_snapshot_p RENAME TO timesheet_snapshot;
+--ALTER TABLE billing_snapshot_p   RENAME TO billing_snapshot;
+--ALTER TABLE bgv_status_p         RENAME TO bgv_status;
+--
+---- 3) Recreate critical indexes on parents (if any name collisions, IF NOT EXISTS prevents failure)
+--CREATE INDEX IF NOT EXISTS idx_ts_ym ON timesheet_snapshot(year_month);
+--CREATE INDEX IF NOT EXISTS idx_billing_keys ON billing_snapshot(engagement_id, engagement_resource_id, year_month);
+--CREATE INDEX IF NOT EXISTS idx_bgv_resource ON bgv_status(resource_id);
+--
+---- 4) (Optional) Drop legacy tables AFTER verification
+---- DROP TABLE timesheet_snapshot_legacy;
+---- DROP TABLE billing_snapshot_legacy;
+---- DROP TABLE bgv_status_legacy;

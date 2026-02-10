@@ -1,0 +1,5 @@
+--
+--REFRESH MATERIALIZED VIEW mv_unbilled_summary;
+--REFRESH MATERIALIZED VIEW mv_unbilled_breakdown;
+--REFRESH MATERIALIZED VIEW mv_utilization_summary;
+--REFRESH MATERIALIZED VIEW mv_bgv_status;

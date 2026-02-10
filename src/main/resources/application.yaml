@@ -1,0 +1,67 @@
+etl:
+  run-on-startup: true   # set false in prod if needed
+  startup:
+    page-size: 500
+    max-pages: 20
+
+app:
+  security:
+    jwt:
+      issuer: iv-pulse
+      access-token-ttl-minutes: 15
+      refresh-token-ttl-days: 7
+      secret: 013acdfdea65c7e6d0f1ab024aee61b800a6c23fa2c419bfd86fb60d080a9c44
+
+    cookie:
+      domain: localhost
+      name: ivp_refresh
+      secure: false
+      same-site: Lax
+      path: /
+
+  cors:
+    origins: http://localhost:5173
+
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/pulse_db
+    username: ivpulse_app
+    password: ivpulse0
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
+logging:
+  level:
+    root: INFO
+    com.ivpulse: DEBUG
+    org.flywaydb: DEBUG
+
+productivv:
+  base-url: http://27.107.6.21:8082/api/export
+  api-key-header: x-api-key
+  api-key: 4e01802d-e45e-47b9-bcaa-e6f4cfd50832
+
+scheduler:
+  cron: "0 0 9 * * *"  # 09:00 every day
+
+kpi:
+  enabling:
+    categories: 
+      - Enabling
+      - Support
+  notice:
+    windowDays: 90

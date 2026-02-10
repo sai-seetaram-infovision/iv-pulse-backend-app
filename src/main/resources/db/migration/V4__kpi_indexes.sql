@@ -1,0 +1,6 @@
+--
+---- KPI PERFORMANCE INDEXES
+--
+--CREATE INDEX idx_ts_ym ON timesheet_snapshot(year_month);
+--CREATE INDEX idx_billing_keys ON billing_snapshot(engagement_id, engagement_resource_id, year_month);
+--CREATE INDEX idx_er_fk ON engagement_resource(engagement_id, resource_id, role_id, location);

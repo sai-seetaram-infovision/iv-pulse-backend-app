@@ -1,0 +1,9 @@
+--
+---- bcrypt for 'ChangeMe@123' generated via BCryptPasswordEncoder
+--INSERT INTO auth_users (username, password_hash)
+--VALUES ('admin', '$2a$10$Z8Kdxn6l1d7B0xOQb6ZtK.3a3o8lQmK1T1WlF2m5yHq3f8oVqX2Wu');
+--
+--INSERT INTO user_roles (user_id, role_id)
+--SELECT u.id, r.id FROM auth_users u, role_master r
+--WHERE u.username='admin' AND r.role_name='ADMIN'
+--ON CONFLICT DO NOTHING;

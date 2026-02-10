@@ -1,0 +1,79 @@
+--
+---- MATERIALIZED VIEW: Unbilled Summary
+--CREATE MATERIALIZED VIEW mv_unbilled_summary AS
+--SELECT
+--  ts.year_month,
+--  e.engagement_id,
+--  er.resource_id,
+--  SUM(ts.total_hours) AS hours,
+--  COALESCE(rc.rate_amount, avg_rate.avg_rate) AS rate,
+--  SUM(ts.total_hours) * COALESCE(rc.rate_amount, avg_rate.avg_rate) AS amount
+--FROM timesheet_snapshot ts
+--JOIN engagement_resource er ON er.engagement_resource_id = ts.engagement_resource_id
+--JOIN engagement e ON e.engagement_id = ts.engagement_id
+--LEFT JOIN billing_snapshot b ON b.engagement_id = ts.engagement_id
+--  AND b.engagement_resource_id = ts.engagement_resource_id
+--  AND b.year_month = ts.year_month
+--LEFT JOIN rate_card rc ON rc.engagement_id = ts.engagement_id AND rc.role_id = er.role_id
+--CROSS JOIN (SELECT AVG(rate_amount) AS avg_rate FROM rate_card) avg_rate
+--WHERE (ts.submitted_flag OR ts.approved_flag)
+--  AND (b.billed_amount IS NULL OR b.billed_amount = 0)
+--GROUP BY ts.year_month, e.engagement_id, er.resource_id, rc.rate_amount, avg_rate.avg_rate;
+--
+---- MATERIALIZED VIEW: Unbilled Breakdown
+--CREATE MATERIALIZED VIEW mv_unbilled_breakdown AS
+--SELECT
+--  ts.year_month,
+--  c.client_id, c.client_name,
+--  e.engagement_id, e.engagement_name,
+--  er.resource_id, r.employee_name,
+--  er.role_id, rm.role_name,
+--  er.location,
+--  SUM(ts.total_hours) AS hours,
+--  COALESCE(rc.rate_amount, avg_rate.avg_rate) AS rate,
+--  SUM(ts.total_hours) * COALESCE(rc.rate_amount, avg_rate.avg_rate) AS amount
+--FROM timesheet_snapshot ts
+--JOIN engagement_resource er ON er.engagement_resource_id = ts.engagement_resource_id
+--JOIN engagement e ON e.engagement_id = ts.engagement_id
+--JOIN client c ON c.client_id = e.client_id
+--JOIN resource r ON r.resource_id = er.resource_id
+--LEFT JOIN role_master rm ON rm.role_id = er.role_id
+--LEFT JOIN billing_snapshot b ON b.engagement_id = ts.engagement_id
+--  AND b.engagement_resource_id = ts.engagement_resource_id
+--  AND b.year_month = ts.year_month
+--LEFT JOIN rate_card rc ON rc.engagement_id = ts.engagement_id AND rc.role_id = er.role_id
+--CROSS JOIN (SELECT AVG(rate_amount) AS avg_rate FROM rate_card) avg_rate
+--WHERE (ts.submitted_flag OR ts.approved_flag)
+--  AND (b.billed_amount IS NULL OR b.billed_amount = 0)
+--GROUP BY ts.year_month, c.client_id, c.client_name, e.engagement_id, e.engagement_name,
+--         er.resource_id, r.employee_name, er.role_id, rm.role_name, er.location,
+--         rc.rate_amount, avg_rate.avg_rate;
+--
+---- MATERIALIZED VIEW: Utilization Summary
+--CREATE MATERIALIZED VIEW mv_utilization_summary AS
+--SELECT
+--  ts.year_month,
+--  SUM(ts.total_hours) AS billable_hours,
+--  SUM(er.plan_hours) AS available_hours,
+--  CASE WHEN SUM(er.plan_hours) > 0 THEN (SUM(ts.total_hours) / SUM(er.plan_hours)) * 100 ELSE 0 END AS utilization
+--FROM timesheet_snapshot ts
+--JOIN engagement_resource er ON er.engagement_resource_id = ts.engagement_resource_id
+--WHERE (ts.submitted_flag OR ts.approved_flag)
+--GROUP BY ts.year_month;
+--
+---- MATERIALIZED VIEW: BGV Status
+--CREATE MATERIALIZED VIEW mv_bgv_status AS
+--SELECT
+--  c.client_id, c.client_name,
+--  e.engagement_id, e.engagement_name,
+--  r.resource_id, r.employee_code, r.employee_name,
+--  rm.role_id, rm.role_name,
+--  er.location,
+--  b.bgv_vendor, b.status,
+--  b.requested_on, b.verified_on, b.remarks
+--FROM engagement_resource er
+--JOIN engagement e ON e.engagement_id = er.engagement_id
+--JOIN client c ON c.client_id = e.client_id
+--JOIN resource r ON r.resource_id = er.resource_id
+--LEFT JOIN role_master rm ON rm.role_id = er.role_id
+--LEFT JOIN bgv_status b ON b.resource_id = er.resource_id;

@@ -1,0 +1,40 @@
+--
+--CREATE TABLE IF NOT EXISTS auth_users (
+--  id BIGSERIAL PRIMARY KEY,
+--  username VARCHAR(100) UNIQUE NOT NULL,
+--  password_hash VARCHAR(255) NOT NULL,
+--  active BOOLEAN NOT NULL DEFAULT TRUE,
+--  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+--);
+--
+--CREATE TABLE IF NOT EXISTS role_master (
+--  id BIGSERIAL PRIMARY KEY,
+--  role_name VARCHAR(100) UNIQUE NOT NULL,
+--  category VARCHAR(100),
+--  active BOOLEAN NOT NULL DEFAULT TRUE
+--);
+--
+--CREATE TABLE IF NOT EXISTS user_roles (
+--  user_id BIGINT REFERENCES auth_users(id) ON DELETE CASCADE,
+--  role_id BIGINT REFERENCES role_master(id) ON DELETE CASCADE,
+--  PRIMARY KEY (user_id, role_id)
+--);
+--
+--CREATE TABLE IF NOT EXISTS refresh_tokens (
+--  id UUID PRIMARY KEY,
+--  user_id BIGINT NOT NULL REFERENCES auth_users(id) ON DELETE CASCADE,
+--  token_hash VARCHAR(256) NOT NULL,
+--  expires_at TIMESTAMP NOT NULL,
+--  revoked BOOLEAN NOT NULL DEFAULT FALSE,
+--  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+--  last_used_at TIMESTAMP
+--);
+--
+--INSERT INTO role_master (role_name, category, active) VALUES
+--  ('ADMIN','SYSTEM',true),
+--  ('SETUP_OWNER','MODULE',true),
+--  ('RESOURCE_OWNER','MODULE',true),
+--  ('STATUS_OWNER','MODULE',true),
+--  ('LEADERSHIP','MODULE',true),
+--  ('VIEWER','MODULE',true)
+--ON CONFLICT DO NOTHING;

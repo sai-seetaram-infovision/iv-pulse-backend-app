@@ -1,0 +1,117 @@
+--
+---- Phase 20: Create partitioned parents and helper functions
+---- Assumes existing tables exist from Phase 16. We'll create parallel parents with suffix _p,
+---- then migrate and swap in V8.
+--
+---- 1) TIMESHEET_SNAPSHOT (monthly partitioning)
+--CREATE TABLE IF NOT EXISTS timesheet_snapshot_p (
+--    ts_id SERIAL PRIMARY KEY,
+--    year_month TEXT NOT NULL,
+--    month_date DATE GENERATED ALWAYS AS (
+--        TO_DATE(year_month || '-01', 'YYYY-MM-DD')
+--    ) STORED,
+--    engagement_id UUID REFERENCES engagement(engagement_id),
+--    engagement_resource_id UUID REFERENCES engagement_resource(engagement_resource_id),
+--    resource_id UUID REFERENCES resource(resource_id),
+--    submitted_flag BOOLEAN,
+--    approved_flag BOOLEAN,
+--    approval_date DATE,
+--    total_hours NUMERIC,
+--    created_at TIMESTAMP DEFAULT now()
+--) PARTITION BY RANGE (month_date);
+--
+---- 2) BILLING_SNAPSHOT (monthly partitioning)
+--CREATE TABLE IF NOT EXISTS billing_snapshot_p (
+--    billing_id SERIAL PRIMARY KEY,
+--    year_month TEXT NOT NULL,
+--    month_date DATE GENERATED ALWAYS AS (
+--        TO_DATE(year_month || '-01', 'YYYY-MM-DD')
+--    ) STORED,
+--    engagement_id UUID REFERENCES engagement(engagement_id),
+--    engagement_resource_id UUID REFERENCES engagement_resource(engagement_resource_id),
+--    billed_amount NUMERIC,
+--    created_at TIMESTAMP DEFAULT now()
+--) PARTITION BY RANGE (month_date);
+--
+---- 3) BGV_STATUS (date partitioning by requested_on, monthly helpers)
+--CREATE TABLE IF NOT EXISTS bgv_status_p (
+--    bgv_id SERIAL PRIMARY KEY,
+--    resource_id UUID REFERENCES resource(resource_id),
+--    bgv_vendor TEXT,
+--    status TEXT,
+--    requested_on DATE,
+--    verified_on DATE,
+--    remarks TEXT,
+--    created_at TIMESTAMP DEFAULT now()
+--) PARTITION BY RANGE (requested_on);
+--
+---- Useful composite indexes on parents (partitioned indexes replicate to children automatically in PG 11+)
+--CREATE INDEX IF NOT EXISTS idx_ts_p_month ON timesheet_snapshot_p (month_date);
+--CREATE INDEX IF NOT EXISTS idx_ts_p_keys  ON timesheet_snapshot_p (engagement_id, engagement_resource_id, month_date);
+--CREATE INDEX IF NOT EXISTS idx_bill_p_month ON billing_snapshot_p (month_date);
+--CREATE INDEX IF NOT EXISTS idx_bill_p_keys  ON billing_snapshot_p (engagement_id, engagement_resource_id, month_date);
+--CREATE INDEX IF NOT EXISTS idx_bgv_p_req ON bgv_status_p (requested_on);
+--CREATE INDEX IF NOT EXISTS idx_bgv_p_res ON bgv_status_p (resource_id);
+--
+---- Helper: ensure partition for a single month on a partitioned table (month-based)
+--CREATE OR REPLACE FUNCTION ensure_month_partition(table_name TEXT, y INT, m INT)
+--RETURNS VOID AS $$
+--DECLARE
+--    from_d DATE := make_date(y, m, 1);
+--    to_d   DATE := (make_date(y, m, 1) + INTERVAL '1 month')::date;
+--    part_name TEXT := table_name || '_p_' || to_char(from_d, 'YYYY_MM');
+--    sql TEXT;
+--BEGIN
+--    IF table_name NOT IN ('timesheet_snapshot_p','billing_snapshot_p') THEN
+--        RAISE EXCEPTION 'Unsupported table for month partition: %', table_name;
+--    END IF;
+--
+--    IF to_regclass(part_name) IS NULL THEN
+--        sql := format('CREATE TABLE %I PARTITION OF %I FOR VALUES FROM (DATE %L) TO (DATE %L)';
+--                      part_name, table_name, from_d, to_d);
+--        EXECUTE sql;
+--    END IF;
+--END;
+--$$ LANGUAGE plpgsql;
+--
+---- Helper: ensure a range of month partitions (inclusive)
+--CREATE OR REPLACE FUNCTION ensure_month_partitions(table_name TEXT, from_month DATE, to_month DATE)
+--RETURNS VOID AS $$
+--DECLARE
+--    d DATE := date_trunc('month', from_month)::date;
+--BEGIN
+--    WHILE d <= date_trunc('month', to_month)::date LOOP
+--        PERFORM ensure_month_partition(table_name, EXTRACT(YEAR FROM d)::int, EXTRACT(MONTH FROM d)::int);
+--        d := (d + INTERVAL '1 month')::date;
+--    END LOOP;
+--END;
+--$$ LANGUAGE plpgsql;
+--
+---- Helper: BGV daily partitions created monthly
+--CREATE OR REPLACE FUNCTION ensure_bgv_month_partition(y INT, m INT)
+--RETURNS VOID AS $$
+--DECLARE
+--    from_d DATE := make_date(y, m, 1);
+--    to_d   DATE := (make_date(y, m, 1) + INTERVAL '1 month')::date;
+--    part_name TEXT := 'bgv_status_p_' || to_char(from_d, 'YYYY_MM');
+--    sql TEXT;
+--BEGIN
+--    IF to_regclass(part_name) IS NULL THEN
+--        sql := format('CREATE TABLE %I PARTITION OF %I FOR VALUES FROM (DATE %L) TO (DATE %L)';
+--                      part_name, 'bgv_status_p', from_d, to_d);
+--        EXECUTE sql;
+--    END IF;
+--END;
+--$$ LANGUAGE plpgsql;
+--
+--CREATE OR REPLACE FUNCTION ensure_bgv_partitions(from_month DATE, to_month DATE)
+--RETURNS VOID AS $$
+--DECLARE
+--    d DATE := date_trunc('month', from_month)::date;
+--BEGIN
+--    WHILE d <= date_trunc('month', to_month)::date LOOP
+--        PERFORM ensure_bgv_month_partition(EXTRACT(YEAR FROM d)::int, EXTRACT(MONTH FROM d)::int);
+--        d := (d + INTERVAL '1 month')::date;
+--    END LOOP;
+--END;
+--$$ LANGUAGE plpgsql;
