@@ -6,20 +6,31 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface ProductivvClient {
-    List<CostCenterDto> getCostCenters();
-    List<ProjectDto> getProjects();
-    List<RoleRefDto> getRolesReference();
-    List<ProjectRateDto> getProjectRates();
+	List<CostCenterDto> getCostCenters();
 
-    List<EmployeeDto> getEmployees();
-    List<EmployeeDto> getEmployees(LocalDate from, LocalDate to);
+	List<ProjectDto> getProjects();
 
-    List<ResourceAssignmentDto> getResources();
+	List<RoleRefDto> getRolesReference();
 
-    List<HiringDto> getHiring();
-    List<OnboardingDto> getOnboarding();
+	List<ProjectRateDto> getProjectRates();
 
-    List<BillingSnapshotDto> getBillingSnapshots();
+	List<EmployeeDto> getEmployees();
 
-    List<TimesheetDto> getTimesheets(LocalDate from, LocalDate to);
+	List<EmployeeDto> getEmployees(LocalDate from, LocalDate to);
+
+	List<ResourceAssignmentDto> getResources();
+
+	List<HiringDto> getHiring();
+
+	List<OnboardingDto> getOnboarding();
+
+	List<BillingSnapshotDto> getBillingSnapshots();
+
+	List<TimesheetDto> getTimesheets(LocalDate from, LocalDate to);
+
+	List<ResourceHistory> getResourceHistoy();
+
+	List<LeaveType> getLeaveTypes();
+
+	List<Designation> getDesignations();
 }

@@ -20,37 +20,29 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/bgv")
 public class BgvController {
 
-    private final BgvService service;
+	private final BgvService service;
 
-    public BgvController(BgvService service) {
+	public BgvController(BgvService service) {
 		super();
 		this.service = service;
 	}
 
 	@GetMapping("/summary")
-    @Cacheable(value = "bgvSummary", key = "T(java.util.Objects).hash(#clientId,#engagementId,#roleId,#location)")
-    public ResponseEnvelope<BgvSummaryDto> summary(
-            @RequestParam(required = false) String clientId,
-            @RequestParam(required = false) String engagementId,
-            @RequestParam(required = false) String roleId,
-            @RequestParam(required = false) String location
-    ) {
-        var filter = new KpiFilter(clientId, engagementId, roleId, location);
-        return ResponseEnvelope.ok(service.summary(filter), "BGV summary computed");
-    }
+	@Cacheable(value = "bgvSummary", key = "T(java.util.Objects).hash(#clientId,#engagementId,#roleId,#location)")
+	public ResponseEnvelope<BgvSummaryDto> summary(@RequestParam(required = false) String clientId,
+			@RequestParam(required = false) String engagementId, @RequestParam(required = false) String roleId,
+			@RequestParam(required = false) String location) {
+		var filter = new KpiFilter(clientId, engagementId, roleId, location);
+		return ResponseEnvelope.ok(service.summary(filter), "BGV summary computed");
+	}
 
-    @GetMapping("/breakdown")
-    @Cacheable(value = "bgvBreakdown", key = "T(java.util.Objects).hash(#clientId,#engagementId,#roleId,#location,#page,#size,#sort)")
-    public ResponseEnvelope<PageEnvelope<BgvRowDto>> breakdown(
-            @RequestParam(required = false) String clientId,
-            @RequestParam(required = false) String engagementId,
-            @RequestParam(required = false) String roleId,
-            @RequestParam(required = false) String location,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "25") int size,
-            @RequestParam(required = false) String sort
-    ) {
-        var filter = new KpiFilter(clientId, engagementId, roleId, location);
-        return ResponseEnvelope.ok(service.breakdown(filter, page, size, sort), "BGV breakdown computed");
-    }
+	@GetMapping("/breakdown")
+	@Cacheable(value = "bgvBreakdown", key = "T(java.util.Objects).hash(#clientId,#engagementId,#roleId,#location,#page,#size,#sort)")
+	public ResponseEnvelope<PageEnvelope<BgvRowDto>> breakdown(@RequestParam(required = false) String clientId,
+			@RequestParam(required = false) String engagementId, @RequestParam(required = false) String roleId,
+			@RequestParam(required = false) String location, @RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "25") int size, @RequestParam(required = false) String sort) {
+		var filter = new KpiFilter(clientId, engagementId, roleId, location);
+		return ResponseEnvelope.ok(service.breakdown(filter, page, size, sort), "BGV breakdown computed");
+	}
 }

@@ -30,7 +30,7 @@ public class ResourceEntity {
 	@Column(name = "full_name", length = 250)
 	private String fullName;
 
-	@Column(name = "email", length = 250, unique = true)
+	@Column(name = "email", length = 250)
 	private String email;
 
 	@Enumerated(EnumType.STRING)
@@ -62,6 +62,50 @@ public class ResourceEntity {
 	@CreationTimestamp
 	@Column(name = "created_at", nullable = false)
 	private OffsetDateTime createdAt;
+
+	@Column(name = "is_billable")
+	private boolean isBillable;
+
+	@Column(name = "is_active")
+	private boolean isActive;
+
+	@Column(name = "employee_status_id")
+	private int employeeStatusId;
+
+	@Column(name = "project_id")
+	private int projectId;
+
+	public boolean isBillable() {
+		return isBillable;
+	}
+
+	public boolean isActive() {
+		return isActive;
+	}
+
+	public void setActive(boolean isActive) {
+		this.isActive = isActive;
+	}
+
+	public int getEmployeeStatusId() {
+		return employeeStatusId;
+	}
+
+	public void setEmployeeStatusId(int employeeStatusId) {
+		this.employeeStatusId = employeeStatusId;
+	}
+
+	public int getProjectId() {
+		return projectId;
+	}
+
+	public void setProjectId(int projectId) {
+		this.projectId = projectId;
+	}
+
+	public void setBillable(boolean isBillable) {
+		this.isBillable = isBillable;
+	}
 
 	public UUID getResourceId() {
 		return resourceId;

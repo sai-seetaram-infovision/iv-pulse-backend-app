@@ -102,7 +102,7 @@ public class StagingBatchProcessor {
 					switch (entity) {
 					case CLIENT -> handleClient(rec);
 					case ENGAGEMENT -> handleEngagement(rec);
-					case ROLE_MASTER -> handleRole(rec);
+					case ROLE -> handleRole(rec);
 					case RATE_CARD -> handleRate(rec);
 					case RESOURCE -> handleResource(rec);
 					case ENGAGEMENT_RESOURCE -> handleEngagementResource(rec);
@@ -178,6 +178,8 @@ public class StagingBatchProcessor {
 			existing.setActiveFlag(entity.getActiveFlag());
 			roleRepo.save(existing);
 		}
+		
+		
 	}
 
 	private void handleRate(StagingRecord rec) throws Exception {
@@ -278,10 +280,11 @@ public class StagingBatchProcessor {
 
 	private void handleOnboarding(StagingRecord rec) throws Exception {
 		OnboardingDto dto = mapper.readValue(rec.getPayload(), OnboardingDto.class);
-		UUID resId = com.ivpulse.util.UuidV5.forName("resource", String.valueOf(dto.getEmployeeId()));
-		ResourceEntity res = resourceRepo.findById(resId).orElse(null);
+//		UUID resId = com.ivpulse.util.UuidV5.forName("resource", String.valueOf(dto.getEmployeeCode()));
+		
+		ResourceEntity res = resourceRepo.findByExternalEmployeeId(dto.getEmployeeCode()).orElse(null);
 		if (res == null)
-			throw new IllegalStateException("Resource not found:" + dto.getEmployeeId());
+			throw new IllegalStateException("Resource not found:" + dto.getEmployeeCode());
 		OnboardingStatus entity = ProductivvMapper.toOnboarding(dto, res);
 		onboardingRepo.save(entity); // Append row
 	}

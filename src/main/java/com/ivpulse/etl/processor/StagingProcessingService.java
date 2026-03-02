@@ -23,7 +23,7 @@ public class StagingProcessingService {
 
 		processed += processor.process(StagingEntity.CLIENT, pageSize, maxPagesPerEntity);
 		processed += processor.process(StagingEntity.ENGAGEMENT, pageSize, maxPagesPerEntity);
-		processed += processor.process(StagingEntity.ROLE_MASTER, pageSize, maxPagesPerEntity);
+		processed += processor.process(StagingEntity.ROLE, pageSize, maxPagesPerEntity);
 		processed += processor.process(StagingEntity.RATE_CARD, pageSize, maxPagesPerEntity);
 		processed += processor.process(StagingEntity.RESOURCE, pageSize, maxPagesPerEntity);
 		processed += processor.process(StagingEntity.ENGAGEMENT_RESOURCE, pageSize, maxPagesPerEntity);

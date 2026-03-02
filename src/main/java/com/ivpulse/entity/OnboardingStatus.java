@@ -1,13 +1,21 @@
 package com.ivpulse.entity;
 
-import com.ivpulse.entity.enums.BgvStatus;
-import com.ivpulse.entity.enums.ClientAccessStatus;
-import com.ivpulse.entity.enums.InductionStatus;
-import com.ivpulse.entity.enums.WorkOrderStatus;
-import jakarta.persistence.*;
-import lombok.*;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
-import java.time.OffsetDateTime;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "onboarding_status", indexes = { @Index(name = "idx_onb_res", columnList = "resource_id"),
@@ -18,42 +26,42 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 @Builder
 public class OnboardingStatus {
+
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	@Column(name = "onboarding_status_id", columnDefinition = "uuid")
+	private UUID onboardingStatusId;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "resource_id", nullable = false, columnDefinition = "uuid")
 	private ResourceEntity resource;
 
-	@Enumerated(EnumType.STRING)
 	@Column(name = "induction_status", length = 20)
-	private InductionStatus inductionStatus;
+	private String inductionStatus;
 
-	@Enumerated(EnumType.STRING)
 	@Column(name = "bgv_status", length = 20)
-	private BgvStatus bgvStatus;
+	private String bgvStatus;
 
-	@Enumerated(EnumType.STRING)
 	@Column(name = "client_access_status", length = 20)
-	private ClientAccessStatus clientAccessStatus;
+	private String clientAccessStatus;
 
-	@Enumerated(EnumType.STRING)
 	@Column(name = "work_order_status", length = 20)
-	private WorkOrderStatus workOrderStatus;
+	private String workOrderStatus;
 
 	@Column(name = "comments", length = 2000)
 	private String comments;
 
-	@Column(name = "last_updated_at")
-	private java.time.OffsetDateTime lastUpdatedAt;
+	@Column(name = "source_last_modified")
+	private LocalDateTime sourceLastModified;
 
-	public Long getId() {
-		return id;
+	@Column(name = "source_system", length = 50)
+	private String sourceSystem;
+
+	public UUID getOnboardingStatusId() {
+		return onboardingStatusId;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public void setOnboardingStatusId(UUID onboardingStatusId) {
+		this.onboardingStatusId = onboardingStatusId;
 	}
 
 	public ResourceEntity getResource() {
@@ -64,35 +72,35 @@ public class OnboardingStatus {
 		this.resource = resource;
 	}
 
-	public InductionStatus getInductionStatus() {
+	public String getInductionStatus() {
 		return inductionStatus;
 	}
 
-	public void setInductionStatus(InductionStatus inductionStatus) {
+	public void setInductionStatus(String inductionStatus) {
 		this.inductionStatus = inductionStatus;
 	}
 
-	public BgvStatus getBgvStatus() {
+	public String getBgvStatus() {
 		return bgvStatus;
 	}
 
-	public void setBgvStatus(BgvStatus bgvStatus) {
+	public void setBgvStatus(String bgvStatus) {
 		this.bgvStatus = bgvStatus;
 	}
 
-	public ClientAccessStatus getClientAccessStatus() {
+	public String getClientAccessStatus() {
 		return clientAccessStatus;
 	}
 
-	public void setClientAccessStatus(ClientAccessStatus clientAccessStatus) {
+	public void setClientAccessStatus(String clientAccessStatus) {
 		this.clientAccessStatus = clientAccessStatus;
 	}
 
-	public WorkOrderStatus getWorkOrderStatus() {
+	public String getWorkOrderStatus() {
 		return workOrderStatus;
 	}
 
-	public void setWorkOrderStatus(WorkOrderStatus workOrderStatus) {
+	public void setWorkOrderStatus(String workOrderStatus) {
 		this.workOrderStatus = workOrderStatus;
 	}
 
@@ -104,11 +112,20 @@ public class OnboardingStatus {
 		this.comments = comments;
 	}
 
-	public java.time.OffsetDateTime getLastUpdatedAt() {
-		return lastUpdatedAt;
+	public LocalDateTime getSourceLastModified() {
+		return sourceLastModified;
 	}
 
-	public void setLastUpdatedAt(java.time.OffsetDateTime lastUpdatedAt) {
-		this.lastUpdatedAt = lastUpdatedAt;
+	public void setSourceLastModified(LocalDateTime sourceLastModified) {
+		this.sourceLastModified = sourceLastModified;
 	}
+
+	public String getSourceSystem() {
+		return sourceSystem;
+	}
+
+	public void setSourceSystem(String sourceSystem) {
+		this.sourceSystem = sourceSystem;
+	}
+
 }

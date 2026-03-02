@@ -81,28 +81,28 @@ CREATE TABLE resource (
     resource_id UUID PRIMARY KEY,
 
     external_employee_id VARCHAR(100),
+    full_name            VARCHAR(250),
+    email                VARCHAR(250),
 
-    full_name VARCHAR(250),
+    employment_type      VARCHAR(20),
+    base_location        VARCHAR(100),
+    grade_level          VARCHAR(100),
+    primary_skill        VARCHAR(200),
 
-    email VARCHAR(250) UNIQUE,
+    joining_date         DATE,
+    exit_date            DATE,
 
-    employment_type VARCHAR(20),
+    employment_status    VARCHAR(20) NOT NULL,
 
-    base_location VARCHAR(100),
+    source_system        VARCHAR(50),
 
-    grade_level VARCHAR(100),
+    created_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
 
-    primary_skill VARCHAR(200),
-
-    joining_date DATE,
-
-    exit_date DATE,
-
-    employment_status VARCHAR(20) NOT NULL,
-
-    source_system VARCHAR(50),
-
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    -- Additional fields from entity
+    is_billable          BOOLEAN,
+    is_active           BOOLEAN,
+    employee_status_id INTEGER,
+    project_id           INTEGER
 );
 
 -- Indexes
@@ -114,7 +114,6 @@ CREATE INDEX idx_resource_status
 
 CREATE INDEX idx_resource_join_exit
     ON resource (joining_date, exit_date);
-
 
 CREATE TABLE engagement_resource (
     engagement_resource_id UUID PRIMARY KEY,
@@ -264,3 +263,36 @@ CREATE TABLE IF NOT EXISTS timesheet_snapshot (
     total_hours NUMERIC,
     created_at TIMESTAMP DEFAULT now()
 );
+
+
+
+CREATE TABLE onboarding_status (
+
+    onboarding_status_id UUID PRIMARY KEY,
+
+    resource_id UUID NOT NULL,
+
+    induction_status VARCHAR(20),
+    bgv_status VARCHAR(20),
+    client_access_status VARCHAR(20),
+    work_order_status VARCHAR(20),
+
+    comments VARCHAR(2000),
+
+    source_last_modified TIMESTAMP,
+    source_system VARCHAR(50),
+
+    CONSTRAINT fk_onboarding_resource
+        FOREIGN KEY (resource_id)
+        REFERENCES resource(resource_id)
+        ON DELETE CASCADE
+);
+
+-- Indexes
+CREATE INDEX idx_onb_res
+    ON onboarding_status(resource_id);
+
+CREATE INDEX idx_onb_bgv
+    ON onboarding_status(bgv_status);
+
+

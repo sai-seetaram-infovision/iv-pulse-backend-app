@@ -3,7 +3,6 @@ package com.ivpulse.client;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.apache.logging.log4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatusCode;
@@ -12,12 +11,15 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.ivpulse.dto.productivv.BillingSnapshotDto;
 import com.ivpulse.dto.productivv.CostCenterDto;
+import com.ivpulse.dto.productivv.Designation;
 import com.ivpulse.dto.productivv.EmployeeDto;
 import com.ivpulse.dto.productivv.HiringDto;
+import com.ivpulse.dto.productivv.LeaveType;
 import com.ivpulse.dto.productivv.OnboardingDto;
 import com.ivpulse.dto.productivv.ProjectDto;
 import com.ivpulse.dto.productivv.ProjectRateDto;
 import com.ivpulse.dto.productivv.ResourceAssignmentDto;
+import com.ivpulse.dto.productivv.ResourceHistory;
 import com.ivpulse.dto.productivv.RoleRefDto;
 import com.ivpulse.dto.productivv.TimesheetDto;
 
@@ -52,8 +54,7 @@ public class ProductivvClientImpl implements ProductivvClient {
 	@Override
 	public List<RoleRefDto> getRolesReference() {
 		// Source uses /reference (roles)
-//		return getList("/reference", RoleRefDto[].class);
-		return null;
+		return getList("/role", RoleRefDto[].class);
 	}
 
 	@Override
@@ -84,7 +85,7 @@ public class ProductivvClientImpl implements ProductivvClient {
 
 	@Override
 	public List<OnboardingDto> getOnboarding() {
-		return getList("/onboarding", OnboardingDto[].class);
+		return getList("/Onboarding", OnboardingDto[].class);
 	}
 
 	@Override
@@ -124,6 +125,21 @@ public class ProductivvClientImpl implements ProductivvClient {
 				.block();
 
 		return (body == null) ? List.of() : List.of(body); // since Java 9, returns immutable list copying array
+	}
+
+	@Override
+	public List<ResourceHistory> getResourceHistoy() {
+		return getList("/ResourceHistory", ResourceHistory[].class);
+	}
+
+	@Override
+	public List<LeaveType> getLeaveTypes() {
+		return getList("/LeaveType", LeaveType[].class);
+	}
+
+	@Override
+	public List<Designation> getDesignations() {
+		return getList("/Designation", Designation[].class);
 	}
 
 }

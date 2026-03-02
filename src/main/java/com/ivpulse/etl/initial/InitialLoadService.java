@@ -27,8 +27,6 @@ public class InitialLoadService {
 	private final JobRunService jobRunService;
 	private final ObjectMapper mapper;
 
-	
-
 	public InitialLoadService(ProductivvClient client, StagingWriterService stagingWriter, JobRunService jobRunService,
 			ObjectMapper mapper) {
 		super();
@@ -45,7 +43,7 @@ public class InitialLoadService {
 		EtlJobRun run = jobRunService.start(EtlJobType.INITIAL_LOAD, "Initial load to staging");
 
 		int clients = 0, engagements = 0, roles = 0, rates = 0, resources = 0, ers = 0, hiring = 0, onboarding = 0,
-				billing = 0, errors = 0;
+				billing = 0, errors = 0, resourceHistory = 0, designation = 0, leaveTypes = 0, leaveHistory = 0;
 		LocalDate partition = LocalDate.now();
 
 		try {
@@ -75,15 +73,15 @@ public class InitialLoadService {
 
 			// 3) Roles reference
 			List<RoleRefDto> rolesRef = client.getRolesReference();
-//			for (RoleRefDto dto : rolesRef) {
-//				try {
-//					write(StagingEntity.ROLE_MASTER, "role:" + dto.getId(), dto, partition);
-//					roles++;
-//				} catch (Exception e) {
-//					errors++;
-//					log.error("Role staging error", e);
-//				}
-//			}
+			for (RoleRefDto dto : rolesRef) {
+				try {
+					write(StagingEntity.ROLE, "role:" + dto.getRoleName(), dto, partition);
+					roles++;
+				} catch (Exception e) {
+					errors++;
+					log.error("Role staging error", e);
+				}
+			}
 
 			// 4) Project rate
 			List<ProjectRateDto> ratesRef = client.getProjectRates();
@@ -121,6 +119,18 @@ public class InitialLoadService {
 				}
 			}
 
+			List<ResourceHistory> resourceHistory1 = client.getResourceHistoy();
+
+			for (ResourceHistory dto : resourceHistory1) {
+				try {
+					write(StagingEntity.RESOURCE_HISTORY, "resource_history:" + dto.getId(), dto, partition);
+					resourceHistory++;
+				} catch (Exception e) {
+					errors++;
+					log.error("resource_history: staging error", e);
+				}
+			}
+
 			// 7) Hiring
 			List<HiringDto> hiringList = client.getHiring();
 			for (HiringDto dto : hiringList) {
@@ -137,11 +147,38 @@ public class InitialLoadService {
 			List<OnboardingDto> onboardingList = client.getOnboarding();
 			for (OnboardingDto dto : onboardingList) {
 				try {
-					write(StagingEntity.ONBOARDING_STATUS, "onboarding:" + dto.getId(), dto, partition);
+					write(StagingEntity.ONBOARDING_STATUS, "onboarding:" + dto.getEmployeeCode(), dto, partition);
 					onboarding++;
 				} catch (Exception e) {
 					errors++;
 					log.error("Onboarding staging error", e);
+				}
+			}
+
+			// 10 LeaveTypes
+
+			List<LeaveType> leaveTypes1 = client.getLeaveTypes();
+
+			for (LeaveType leaveType : leaveTypes1) {
+				try {
+					write(StagingEntity.LEAVE_TYPES, "leave_type:" + leaveType.getId(), leaveType, partition);
+					leaveTypes++;
+				} catch (Exception e) {
+					errors++;
+					log.error("LeaveType staging error", e);
+				}
+			}
+
+			List<Designation> designations = client.getDesignations();
+			for (Designation designation1 : designations) {
+
+				try {
+					write(StagingEntity.DESIGNATION, "Designations:" + designation1.getId(), designation1, partition);
+					designation++;
+
+				} catch (Exception e) {
+					errors++;
+					log.error("designation staging error", e);
 				}
 			}
 
@@ -158,7 +195,8 @@ public class InitialLoadService {
 //				}
 //			}
 
-			int total = clients + engagements + roles + rates + resources + ers + hiring + onboarding + billing;
+			int total = clients + engagements + roles + rates + resources + ers + hiring + onboarding + billing
+					+ resourceHistory + designation + leaveHistory;
 			long millis = System.currentTimeMillis() - start;
 			jobRunService.success(run, total, errors, "Initial load completed");
 
@@ -175,6 +213,10 @@ public class InitialLoadService {
 			result.setOnboarding(onboarding);
 
 			result.setBillingSnapshots(billing);
+			result.setResourceHistory(resourceHistory);
+			result.setDesignation(designation);
+			result.setLeaveHistory(leaveHistory);
+			result.setLeaveTypes(leaveTypes);
 			result.setTotalWritten(total);
 			result.setErrors(errors);
 			result.setMillis(millis);

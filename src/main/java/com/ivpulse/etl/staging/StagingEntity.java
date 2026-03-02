@@ -3,7 +3,7 @@ package com.ivpulse.etl.staging;
 public enum StagingEntity {
     CLIENT,
     ENGAGEMENT,
-    ROLE_MASTER,
+    ROLE,
     RATE_CARD,
     RESOURCE,
     ENGAGEMENT_RESOURCE,
@@ -11,5 +11,9 @@ public enum StagingEntity {
     ONBOARDING_STATUS,
     BILLING_SNAPSHOT,
     TIMESHEET_SNAPSHOT,
+    RESOURCE_HISTORY,
+    LEAVE_TYPES,
+    LEAVE_HISTORY,
+    DESIGNATION,
     UNKNOWN
 }

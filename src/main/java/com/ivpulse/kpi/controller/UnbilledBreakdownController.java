@@ -1,24 +1,34 @@
 //
 //package com.ivpulse.kpi.controller;
 //
-//import com.ivpulse.kpi.dto.*;
-//import com.ivpulse.kpi.service.FilterAwareKpiService;
-//import lombok.RequiredArgsConstructor;
-//import org.springframework.cache.annotation.Cacheable;
-//import org.springframework.format.annotation.DateTimeFormat;
-//import org.springframework.web.bind.annotation.*;
-//
 //import java.time.LocalDate;
 //import java.util.Optional;
 //
+//import org.springframework.cache.annotation.Cacheable;
+//import org.springframework.format.annotation.DateTimeFormat;
+//import org.springframework.web.bind.annotation.GetMapping;
+//import org.springframework.web.bind.annotation.RequestMapping;
+//import org.springframework.web.bind.annotation.RequestParam;
+//import org.springframework.web.bind.annotation.RestController;
+//
+//import com.ivpulse.kpi.dto.KpiFilter;
+//import com.ivpulse.kpi.dto.PageEnvelope;
+//import com.ivpulse.kpi.dto.ResponseEnvelope;
+//import com.ivpulse.kpi.dto.UnbilledRowDto;
+//import com.ivpulse.kpi.store.FilterAwareKpiRepository;
+//
 //@RestController
 //@RequestMapping("/api/kpi/unbilled")
-//@RequiredArgsConstructor
 //public class UnbilledBreakdownController {
 //
-//    private final FilterAwareKpiService service;
+//    private final FilterAwareKpiRepository service;
 //
-//    @GetMapping("/breakdown")
+//    public UnbilledBreakdownController(com.ivpulse.kpi.controller.FilterAwareKpiService service) {
+//		super();
+//		this.service = service;
+//	}
+//
+//	@GetMapping("/breakdown")
 //    @Cacheable(value = "kpiUnbilledBreakdown", key = "T(java.util.Objects).hash(#asOf,#clientId,#engagementId,#roleId,#location,#page,#size,#sort)")
 //    public ResponseEnvelope<PageEnvelope<UnbilledRowDto>> breakdown(
 //            @RequestParam(name = "asOf", required = false)
